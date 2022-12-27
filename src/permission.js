@@ -11,7 +11,7 @@ import { getAKSKStorageKey } from '@/api/gitee/gitee.js'
 
 NProgress.configure({ showSpinner: false })
 
-const whiteList = ['/login', '/auth-redirect', '/bind', '/register', '/noter', '/noter/index', '/init', '/page']
+const whiteList = ['/login', '/auth-redirect', '/bind', '/register', '/init', '/page']
 
 router.beforeEach((to, from, next) => {
   NProgress.start()

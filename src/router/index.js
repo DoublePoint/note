@@ -57,19 +57,14 @@ export const constantRoutes = [
       },
     ],
   },
-  // {
-  //   path: "/login",
-  //   component: () => import("@/views/login"),
-  //   hidden: true,
-  // },
   {
-    path: '/index',
+    path: '/',
     component: NoterLayout,
     hidden: true,
   },
   {
-    path: '/noter',
-    component: () => import('@/views/noter/noter.vue'),
+    path: '/index',
+    component: NoterLayout,
     hidden: true,
   },
   {
