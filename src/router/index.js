@@ -63,6 +63,11 @@ export const constantRoutes = [
     hidden: true,
   },
   {
+    path: '/note/',
+    component: NoterLayout,
+    hidden: true,
+  },
+  {
     path: '/index',
     component: NoterLayout,
     hidden: true,
