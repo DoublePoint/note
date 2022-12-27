@@ -1,8 +1,8 @@
 {
-  "name": "ruoyi",
+  "name": "Note",
   "version": "3.8.4",
-  "description": "若依管理系统",
-  "author": "若依",
+  "description": "Note",
+  "author": "DoublePoint",
   "license": "MIT",
   "scripts": {
     "dev": "vue-cli-service serve",
