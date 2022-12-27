@@ -104,7 +104,7 @@ export default {
       let tagsView = []
       tagsView.push(this.item)
       // debugger
-      this.$router.push({ path: 'page', query: { gitpath: this.item.gitpath } })
+      this.$router.push({ path: '/page', query: { gitpath: this.item.gitpath } })
       this.$store.commit('tagsView/SET_IFRAME_VIEW', tagsView)
     },
   },
