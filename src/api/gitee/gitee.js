@@ -20,6 +20,7 @@ export function requestToken(code) {
   })
 }
 
+// 获取Giteer信息
 export function requestGiterInfo(access_token) {
   if (access_token == undefined) {
     access_token = getToken()
@@ -38,6 +39,18 @@ export function requestNoterRepository(owner, repo, access_token) {
     method: 'get',
   })
 }
+
+//获取所有仓库信息
+export function getAllRepos(access_token) {
+  if (access_token == undefined) {
+    access_token = getToken()
+  }
+  return request({
+    url: `https://gitee.com/api/v5/user/repos?access_token=${access_token}&sort=full_name&page=1&per_page=20`,
+    method: 'get',
+  })
+}
+
 // 获取仓库具体路径下的内容
 export function getFileContent(path, access_token) {
   if (access_token == undefined) {
@@ -174,6 +187,7 @@ export function getDirectories(access_token, repo) {
   })
 }
 
+// 刷新当前Giteer用户信息
 export function refreshGiterInfo() {
   return requestGiterInfo().then((res) => {
     cacheUtil.local.setJSON(Const.LOCAL_STORAGE_USER_INFO_KEY, res)

@@ -43,7 +43,6 @@ export default {
       this.form = data
     }
     let token = getToken()
-    debugger
     if (token === undefined) {
       this.initToken()
     } else {

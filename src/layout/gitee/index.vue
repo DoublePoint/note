@@ -2,21 +2,25 @@
   <div :class="classObj" class="app-wrapper" :style="{ '--current-color': theme }">
     <!-- <div v-if="device==='mobile'&&sidebar.opened" class="drawer-bg"
       @click="handleClickOutside" /> -->
-
+    <splitpanes class="default-theme" @resize="paneSize = $event[0].size" style="height: 100%; background: #2b2f3a">
+      <pane :size="paneSize" min-size="0" max-size="35">
+        <sidebar v-if="!sidebar.hide" class="sidebar-container" :style="{ width: sidebarWidth }" />
+      </pane>
+      <pane :size="100 - paneSize">
+        <div :class="{ hasTagsView: needTagsView, sidebarHide: sidebar.hide }" class="main-container" :style="{ 'margin-left': 0 }">
+          <div :class="{ 'fixed-header': fixedHeader }">
+            <navbar />
+            <tags-view v-if="needTagsView" />
+          </div>
+          <!-- 主窗口 -->
+          <app-main />
+          <right-panel>
+            <settings />
+          </right-panel>
+        </div>
+      </pane>
+    </splitpanes>
     <!-- 菜单栏 -->
-    <sidebar v-if="!sidebar.hide" class="sidebar-container" />
-
-    <div :class="{ hasTagsView: needTagsView, sidebarHide: sidebar.hide }" class="main-container">
-      <div :class="{ 'fixed-header': fixedHeader }">
-        <navbar />
-        <tags-view v-if="needTagsView" />
-      </div>
-      <!-- 主窗口 -->
-      <app-main />
-      <right-panel>
-        <settings />
-      </right-panel>
-    </div>
 
     <!-- 创建文件夹弹窗 -->
     <el-dialog title="创建文件夹" :visible.sync="menuState.showCreateDirDialog">
@@ -45,7 +49,10 @@ import { mapState } from 'vuex'
 import variables from '@/assets/styles/variables.scss'
 import { createGitDirectory, getDirectories } from '@/api/gitee/gitee.js'
 import Constant from '@/utils/const.js'
-import cacheUtil from '@/plugins/cache.js'
+// 拖动效果
+import { Splitpanes, Pane } from 'splitpanes'
+import 'splitpanes/dist/splitpanes.css'
+import cachePlugin from '@/plugins/cacheplugin.js'
 
 export default {
   name: 'Layout',
@@ -56,8 +63,13 @@ export default {
     Settings,
     Sidebar,
     TagsView,
+    Splitpanes,
+    Pane,
   },
-  created() {},
+  created() {
+    // 初始化side宽度相关内容
+    this.initSideBarinfo()
+  },
   data() {
     return {
       formLabelWidth: '120px',
@@ -65,7 +77,16 @@ export default {
       form: {
         fileName: '',
       },
+      paneSize: cachePlugin.getSidebarInfo() == null ? Constant.SIDEBAR_DEFAULT_WIDTH : cachePlugin.getSidebarInfo().width,
     }
+  },
+  watch: {
+    paneSize(newVal, oldVal) {
+      this.$store.dispatch('app/setSidebarWidth', newVal)
+      let barInfo = cachePlugin.getSidebarInfo()
+      barInfo.width = newVal
+      cachePlugin.setSidebarInfo(barInfo)
+    },
   },
   mixins: [ResizeMixin],
   computed: {
@@ -92,6 +113,9 @@ export default {
     preDir() {
       return (this.menuState.menuMeta.gitpath == undefined ? '' : this.menuState.menuMeta.gitpath) + '/'
     },
+    sidebarWidth() {
+      return this.sidebar.width + '%'
+    },
   },
   methods: {
     handleClickOutside() {},
@@ -102,12 +126,19 @@ export default {
         this.$store.commit('changeShowCreateDirDialog', false)
       })
     },
-    refreshGiteeDirectory() {
-      getDirectories().then((res) => {
-        cacheUtil.local.setJSON(Constant.GITEE_DIRECTORY_TREE, res.tree)
-        let data = dirParse(res.tree)
-        this.$store.commit('SET_NOTEDIRS', data)
-      })
+    // refreshGiteeDirectory() {
+    //   getDirectories().then((res) => {
+    //     cachePlugin.setGiteeDirectoryTree(res.tree)
+    //     let data = dirParse(res.tree)
+    //     this.$store.commit('SET_NOTEDIRS', data)
+    //   })
+    // },
+    initSideBarinfo() {
+      let sidebarInfo = cachePlugin.getSidebarInfo()
+      if (sidebarInfo == null) {
+        sidebarInfo = {}
+        cachePlugin.setSidebarInfo(sidebarInfo)
+      }
     },
   },
 }

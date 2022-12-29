@@ -31,11 +31,6 @@ import NoterLayout from '@/layout/gitee'
 // 公共路由
 export const constantRoutes = [
   {
-    path: '/' + process.env.VUE_APP_NAME,
-    component: () => import('@/views/noter/init.vue'),
-    hidden: true,
-  },
-  {
     path: '/main',
     component: NoterLayout,
     hidden: true,

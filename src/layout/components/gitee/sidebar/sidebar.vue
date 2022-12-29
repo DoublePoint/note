@@ -1,7 +1,12 @@
 <template>
   <div :class="{ 'has-logo': showLogo }" :style="{ backgroundColor: settings.sideTheme === 'theme-dark' ? variables.menuBackground : variables.menuLightBackground }">
     <logo v-if="showLogo" :collapse="isCollapse" />
-    <el-scrollbar :class="settings.sideTheme" wrap-class="scrollbar-wrapper">
+    <div style="text-align: center; margin-top: 25px" v-if="showCreateNewBtn">
+      <el-row>
+        <el-button type="primary" @click="handleCreateWS">创建一个工作空间</el-button>
+      </el-row>
+    </div>
+    <el-scrollbar v-if="hasNoterRepository" :class="settings.sideTheme" wrap-class="scrollbar-wrapper">
       <div class="sidebar-title-parent">
         <h1 class="sidebar-title" style="color: rgb(255, 255, 255); line-height: 30px">私有的</h1>
         <el-button type="primary" class="sidebar-btn" icon="el-icon-plus" circle @click="createNew"></el-button>
@@ -34,9 +39,11 @@ import Logo from './Logo'
 import SidebarItem from './SidebarItem'
 import variables from '@/assets/styles/variables.scss'
 import ContextMenu from '@/components/ContextMenu/ContextMenu.vue'
-import { getDirectories, deleteDirectories } from '@/api/gitee/gitee.js'
+import { getDirectories, createNewRepository, requestGiterInfo, getAllRepos } from '@/api/gitee/gitee.js'
 import dirParse from '@/api/tool/dirparse.js'
 import cacheUtil from '@/plugins/cache.js'
+import defaultPlugin from '@/plugins/defaultplugin.js'
+import gitplugin from '@/plugins/gitplugin.js'
 import Constant from '@/utils/const.js'
 
 export default {
@@ -68,22 +75,71 @@ export default {
       visible: null,
       topNumber: 0,
       leftNumber: 0,
+      hasNoterRepository: false,
+      showCreateNewBtn: false,
     }
   },
-  created() {
-    getDirectories().then((res) => {
-      cacheUtil.local.setJSON(Constant.GITEE_DIRECTORY_TREE, res.tree)
-      let data = dirParse(res.tree)
-      this.$store.commit('SET_NOTEDIRS', data)
-    })
+  watch: {
+    hasNoterRepository(newVal) {
+      if (newVal) {
+        this.refreshGiteeDirectory()
+      }
+    },
   },
   methods: {
     save() {},
     createNew() {
       this.$store.commit('changeShowCreateDirDialog', true)
     },
+    initRepository() {
+      requestGiterInfo()
+        .then((res) => {
+          return getAllRepos()
+        })
+        .then((res) => {
+          const repoArr = res
+          debugger
+          const repo = repoArr.find((item) => item.name == defaultPlugin.getDefaultRepositoryName())
+          if (repo == undefined) {
+            this.hasNoterRepository = false
+            this.showCreateNewBtn = true
+          } else {
+            this.hasNoterRepository = true
+            this.showCreateNewBtn = false
+          }
+          // console.log(res);
+        })
+        .catch((e) => {
+          this.hasNoterRepository = false
+          this.showCreateNewBtn = true
+          console.log(e)
+        })
+    },
+    handleCreateWS() {
+      let repoName = defaultPlugin.getDefaultRepositoryName()
+      createNewRepository(repoName)
+        .then((res) => {
+          return gitplugin.createReadmeFile()
+        })
+        .then((res) => {
+          this.$modal.msgSuccess('新增成功')
+          setTimeout(() => {
+            window.location.reload()
+          }, 2000)
+        })
+    },
+    refreshGiteeDirectory() {
+      getDirectories().then((res) => {
+        cacheUtil.local.setJSON(Constant.GITEE_DIRECTORY_TREE, res.tree)
+        let data = dirParse(res.tree)
+        this.$store.commit('SET_NOTEDIRS', data)
+      })
+    },
   },
-  mounted() {},
+
+  mounted() {
+    this.initRepository()
+  },
 }
 </script>
 

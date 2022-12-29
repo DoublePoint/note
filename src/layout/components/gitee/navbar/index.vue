@@ -1,6 +1,6 @@
 <template>
   <div class="navbar">
-    <hamburger id="hamburger-container" :is-active="sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" />
+    <!-- <hamburger id="hamburger-container" :is-active="sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" /> -->
     <div class="right-menu">
       <template v-if="device !== 'mobile'">
         <search id="header-search" class="right-menu-item" />
@@ -96,14 +96,14 @@ export default {
   },
   methods: {
     getGiterInfo() {
-      debugger
       requestGiterInfo(getToken()).then((response) => {
         // debugger
         this.avatar_url = response.avatar_url
       })
     },
     toggleSideBar() {
-      this.$store.dispatch('app/toggleSideBar')
+      // this.$store.dispatch('app/toggleSideBar')
+      this.$store.dispatch('app/setSidebarWidth', 3)
     },
     async logout() {
       this.$confirm('确定注销并退出系统吗？', '提示', {

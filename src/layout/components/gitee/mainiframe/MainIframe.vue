@@ -10,7 +10,7 @@ import variables from '@/assets/styles/variables.scss'
 import { mapState } from 'vuex'
 import { updateGitFile, getFileContent, getSelectedMenu } from '@/api/gitee/gitee.js'
 import { decodeBase64Content, encodeBase64Content } from '@/utils/base64'
-import { refreshGitTree } from '@/plugins/gitplugin.js'
+import gitplugin from '@/plugins/gitplugin.js'
 
 export default {
   name: 'MainIframe',
@@ -32,7 +32,7 @@ export default {
       console.warn('Gipath is null.')
       return
     }
-    refreshGitTree().then((res) => {
+    gitplugin.refreshGitTree().then((res) => {
       this.initContent()
     })
   },
@@ -40,7 +40,7 @@ export default {
     save() {
       updateGitFile(this.gitPath, this.content, this.selectedFile.sha).then((res) => {
         this.$modal.msgSuccess('保存成功')
-        refreshGitTree().then((res) => {
+        gitplugin.refreshGitTree().then((res) => {
           this.initContent()
         })
       })

@@ -4,7 +4,7 @@
       <template v-if="hasOneShowingChild(item.children, item) && (!onlyOneChild.children || onlyOneChild.noShowingChildren) && !item.alwaysShow">
         <!-- <app-link v-if="onlyOneChild.meta" :to="resolvePath(onlyOneChild.path, onlyOneChild.query)"> -->
         <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{ 'submenu-title-noDropdown': !isNest }">
-          <item :icon="onlyOneChild.meta.icon || (item.meta && item.meta.icon)" :title="onlyOneChild.meta.title" />
+          <item :menuMeta="item" :icon="onlyOneChild.meta.icon || (item.meta && item.meta.icon)" :title="onlyOneChild.meta.title"> </item>
         </el-menu-item>
         <!-- </app-link> -->
       </template>
@@ -12,7 +12,7 @@
       <el-submenu v-else ref="subMenu" :index="resolvePath(item.path)" popper-append-to-body>
         <template slot="title">
           <!-- <item v-if="item.meta" :icon="item.meta && item.meta.icon" :title="item.meta.title" /> -->
-          <item v-if="item.meta" :icon="item.children.length == 0 ? 'file-fill' : item.meta.icon" :title="item.meta.title" />
+          <item v-if="item.meta" :menuMeta="item" :icon="item.children.length == 0 ? 'file-fill' : item.meta.icon" :title="item.meta.title" />
         </template>
         <sidebar-item v-for="child in item.children" :key="child.path" :is-nest="true" :item="child" :base-path="resolvePath(child.path)" class="nest-menu" />
       </el-submenu>
@@ -101,6 +101,8 @@ export default {
       if (this.item.children.length > 0) {
         return
       }
+      this.$store.commit('changeMenuMeta', this.item)
+      console.log("this.$store.commit('changeMenuMeta', this.item)")
       let tagsView = []
       tagsView.push(this.item)
       // debugger
@@ -110,3 +112,8 @@ export default {
   },
 }
 </script>
+
+<style lang="scss" scoped>
+.menu-item {
+}
+</style>

@@ -37,7 +37,6 @@ export default {
   },
   methods: {
     getToken() {
-      debugger
       requestToken(this.$route.query.code)
         .then((response) => {
           setToken(response.access_token)

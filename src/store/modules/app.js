@@ -1,19 +1,22 @@
 import Cookies from 'js-cookie'
+import Constant from '@/utils/const.js'
+import cachePlugin from '@/plugins/cacheplugin.js'
 
 const state = {
   sidebar: {
     opened: Cookies.get('sidebarStatus') ? !!+Cookies.get('sidebarStatus') : true,
     withoutAnimation: false,
-    hide: false
+    hide: false,
+    width: cachePlugin.getSidebarInfo() == null ? Constant.SIDEBAR_DEFAULT_WIDTH : cachePlugin.getSidebarInfo().width,
   },
   device: 'desktop',
-  size: Cookies.get('size') || 'medium'
+  size: Cookies.get('size') || 'medium',
 }
 
 const mutations = {
-  TOGGLE_SIDEBAR: state => {
+  TOGGLE_SIDEBAR: (state) => {
     if (state.sidebar.hide) {
-      return false;
+      return false
     }
     state.sidebar.opened = !state.sidebar.opened
     state.sidebar.withoutAnimation = false
@@ -37,7 +40,10 @@ const mutations = {
   },
   SET_SIDEBAR_HIDE: (state, status) => {
     state.sidebar.hide = status
-  }
+  },
+  SET_SIDEBAR_WIDTH: (state, width) => {
+    state.sidebar.width = width
+  },
 }
 
 const actions = {
@@ -55,12 +61,15 @@ const actions = {
   },
   toggleSideBarHide({ commit }, status) {
     commit('SET_SIDEBAR_HIDE', status)
-  }
+  },
+  setSidebarWidth({ commit }, width) {
+    commit('SET_SIDEBAR_WIDTH', width)
+  },
 }
 
 export default {
   namespaced: true,
   state,
   mutations,
-  actions
+  actions,
 }
