@@ -70,7 +70,7 @@ export default {
     deleteDirectories() {
       let access_token = getToken()
       const userInfo = cacheUtil.local.getJSON(Const.LOCAL_STORAGE_USER_INFO_KEY)
-      let repo = Const.BASE_REPOSITORY_NAME
+      let repo = defaultplugin.getDefaultRepositoryName()
       let owner = userInfo.name
       let path = this.meta.gitpath
 

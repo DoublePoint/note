@@ -81,6 +81,7 @@ export default {
   },
   watch: {
     hasNoterRepository(newVal) {
+      debugger
       if (newVal) {
         this.refreshGiteeDirectory()
       }
@@ -94,20 +95,28 @@ export default {
     initRepository() {
       requestGiterInfo()
         .then((res) => {
-          return getAllRepos()
+          return gitplugin.isRepositoryExist(defaultPlugin.getDefaultRepositoryName())
+          // return getAllRepos()
         })
-        .then((res) => {
-          const repoArr = res
-          debugger
-          const repo = repoArr.find((item) => item.name == defaultPlugin.getDefaultRepositoryName())
-          if (repo == undefined) {
-            this.hasNoterRepository = false
-            this.showCreateNewBtn = true
-          } else {
+        .then((isExist) => {
+          // const repoArr = res
+          // debugger
+          // const repo = repoArr.find((item) => item.name == defaultPlugin.getDefaultRepositoryName())
+          // if (repo == undefined) {
+          //   this.hasNoterRepository = false
+          //   this.showCreateNewBtn = true
+          // } else {
+          //   this.hasNoterRepository = true
+          //   this.showCreateNewBtn = false
+          // }
+          // console.log(res);
+          if (isExist) {
             this.hasNoterRepository = true
             this.showCreateNewBtn = false
+          } else {
+            this.hasNoterRepository = false
+            this.showCreateNewBtn = true
           }
-          // console.log(res);
         })
         .catch((e) => {
           this.hasNoterRepository = false
@@ -117,19 +126,17 @@ export default {
     },
     handleCreateWS() {
       let repoName = defaultPlugin.getDefaultRepositoryName()
-      createNewRepository(repoName)
-        .then((res) => {
-          return gitplugin.createReadmeFile()
-        })
-        .then((res) => {
-          this.$modal.msgSuccess('新增成功')
+      createNewRepository(repoName).then((res) => {
+        this.$modal.msgSuccess('新增成功')
+        this.refreshGiteeDirectory().then((res) => {
           setTimeout(() => {
             window.location.reload()
           }, 2000)
         })
+      })
     },
     refreshGiteeDirectory() {
-      getDirectories().then((res) => {
+      return getDirectories().then((res) => {
         cacheUtil.local.setJSON(Constant.GITEE_DIRECTORY_TREE, res.tree)
         let data = dirParse(res.tree)
         this.$store.commit('SET_NOTEDIRS', data)

@@ -1,6 +1,7 @@
 <template>
   <div class="main">
-    <mavon-editor class="mavon" navigation @save="save" v-model="content"></mavon-editor>
+    <mavon-editor v-if="isMDShow" class="mavon" navigation @save="save" v-model="content"></mavon-editor>
+    <nofile v-if="is404Show"></nofile>
   </div>
 </template>
 
@@ -11,18 +12,23 @@ import { mapState } from 'vuex'
 import { updateGitFile, getFileContent, getSelectedMenu } from '@/api/gitee/gitee.js'
 import { decodeBase64Content, encodeBase64Content } from '@/utils/base64'
 import gitplugin from '@/plugins/gitplugin.js'
+import nofile from '@/views/error/404nofile.vue'
+import defaultPlugin from '@/plugins/defaultplugin.js'
 
 export default {
   name: 'MainIframe',
   computed: {
     ...mapState(['tagsView']),
   },
+  components: { nofile },
   data() {
     return {
       previewBackground: variables.baseColor,
       content: '',
       gitPath: '',
       selectedFile: {},
+      isMDShow: false,
+      is404Show: false,
     }
   },
   mounted() {
@@ -32,8 +38,11 @@ export default {
       console.warn('Gipath is null.')
       return
     }
-    gitplugin.refreshGitTree().then((res) => {
-      this.initContent()
+    debugger
+    gitplugin.isRepositoryExist(defaultPlugin.getDefaultRepositoryName()).then((res) => {
+      if (res == true) {
+        this.initContent()
+      }
     })
   },
   methods: {
@@ -48,7 +57,14 @@ export default {
     initContent() {
       this.selectedFile = getSelectedMenu(this.gitPath)
       getFileContent(this.gitPath).then((res) => {
+        if (res.content == undefined) {
+          this.isMDShow = false
+          this.is404Show = true
+          return
+        }
         this.content = decodeBase64Content(res.content)
+        this.isMDShow = true
+        this.is404Show = false
       })
     },
   },

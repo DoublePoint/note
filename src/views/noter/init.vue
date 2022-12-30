@@ -26,6 +26,7 @@ import cacheUtil from '@/plugins/cache.js'
 import { getAKSKStorageKey, requestGiterInfo, requestToken } from '@/api/gitee/gitee.js'
 import { getToken, setToken, setRefreshToken, setGiteeScope, setUserInfo } from '@/utils/auth.js'
 import Const from '@/utils/const.js'
+import { getRefreshToken } from '../../utils/auth'
 export default {
   components: {},
   data() {
@@ -41,12 +42,19 @@ export default {
     let data = cacheUtil.local.getJSON(getAKSKStorageKey())
     if (data != null) {
       this.form = data
+    } else {
+      return
     }
     let token = getToken()
     if (token === undefined) {
-      this.initToken()
+      //从Gitee页面跳转过来，需要首次初始化token信息
+      if (this.$route.query.code != null) {
+        this.initToken()
+      } else {
+        this.$router.push('/login')
+      }
     } else {
-      this.$router.push('/index')
+      this.$router.push('/login')
     }
   },
   computed: {
@@ -72,9 +80,6 @@ export default {
       this.$router.push('/login')
     },
     initToken() {
-      if (this.$route.query.code == null) {
-        return
-      }
       // debugger
       requestToken(this.$route.query.code)
         .then((response) => {
@@ -91,6 +96,7 @@ export default {
           this.$router.push('/index')
         })
     },
+    refreshToken() {},
   },
 }
 </script>

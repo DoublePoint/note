@@ -3,6 +3,7 @@ import { getToken } from '@/utils/auth.js'
 import { decodeBase64Content, encodeBase64Content } from '../../utils/base64'
 import Const from '@/utils/const.js'
 import cacheUtil from '@/plugins/cache.js'
+import defaultplugin from '@/plugins/defaultplugin.js'
 
 export function getAKSKStorageKey() {
   return Const.AK_SK_KEY
@@ -30,12 +31,21 @@ export function requestGiterInfo(access_token) {
     method: 'get',
   })
 }
+
+// 获取某个仓库的信息
 export function requestNoterRepository(owner, repo, access_token) {
   if (access_token == undefined) {
     access_token = getToken()
   }
   return request({
     url: `https://gitee.com/api/v5/repos/${owner}/${repo}?access_token=${access_token}`,
+    method: 'get',
+  })
+}
+
+export function refreshToken(refresh_token) {
+  return request({
+    url: `https://gitee.com/oauth/token?grant_type=refresh_token&refresh_token=${refresh_token}`,
     method: 'get',
   })
 }
@@ -56,9 +66,10 @@ export function getFileContent(path, access_token) {
   if (access_token == undefined) {
     access_token = getToken()
   }
+  // debugger
   const userInfo = cacheUtil.local.getJSON(Const.LOCAL_STORAGE_USER_INFO_KEY)
   const owner = userInfo.name
-  const repo = Const.BASE_REPOSITORY_NAME
+  const repo = defaultplugin.getDefaultRepositoryName()
   return request({
     // url: `https://gitee.com/api/v5/repos/${owner}/${repo}/git/blobs/${sha}`,
     url: `https://gitee.com/api/v5/repos/${owner}/${repo}/contents/${path}`,
@@ -75,6 +86,7 @@ export function createNewRepository(name, access_token) {
     method: 'post',
     data: {
       name,
+      auto_init: true,
     },
   })
 }
@@ -85,7 +97,7 @@ export function createGitDirectory(path, access_token) {
 
   const userInfo = cacheUtil.local.getJSON(Const.LOCAL_STORAGE_USER_INFO_KEY)
   const owner = userInfo.name
-  const repo = Const.BASE_REPOSITORY_NAME
+  const repo = defaultplugin.getDefaultRepositoryName()
   let obj = {}
   obj.access_token = access_token
   obj.owner = owner
@@ -122,7 +134,7 @@ export function saveGitFile(path, filecontent, access_token) {
   }
   const userInfo = cacheUtil.local.getJSON(Const.LOCAL_STORAGE_USER_INFO_KEY)
   const owner = userInfo.name
-  const repo = Const.BASE_REPOSITORY_NAME
+  const repo = defaultplugin.getDefaultRepositoryName()
   return request({
     url: `https://gitee.com/api/v5/repos/${owner}/${repo}/contents/${path}`,
     method: 'post',
@@ -140,7 +152,7 @@ export function createGitFile(path, filecontent, access_token) {
   }
   const userInfo = cacheUtil.local.getJSON(Const.LOCAL_STORAGE_USER_INFO_KEY)
   const owner = userInfo.name
-  const repo = Const.BASE_REPOSITORY_NAME
+  const repo = defaultplugin.getDefaultRepositoryName()
   return request({
     url: `https://gitee.com/api/v5/repos/${owner}/${repo}/contents/${path}`,
     method: 'post',
@@ -158,7 +170,7 @@ export function updateGitFile(path, filecontent, sha, access_token) {
   }
   const userInfo = cacheUtil.local.getJSON(Const.LOCAL_STORAGE_USER_INFO_KEY)
   const owner = userInfo.name
-  const repo = Const.BASE_REPOSITORY_NAME
+  const repo = defaultplugin.getDefaultRepositoryName()
   return request({
     url: `https://gitee.com/api/v5/repos/${owner}/${repo}/contents/${path}`,
     method: 'put',
@@ -179,7 +191,7 @@ export function getDirectories(access_token, repo) {
   let sha = 'master'
   let owner = userInfo.name
   if (repo == undefined) {
-    repo = Const.BASE_REPOSITORY_NAME
+    repo = defaultplugin.getDefaultRepositoryName()
   }
   return request({
     url: `https://gitee.com/api/v5/repos/${owner}/${repo}/git/trees/${sha}?recursive=1&access_token=${access_token}`,
