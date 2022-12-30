@@ -2,6 +2,7 @@
   <div class="main">
     <mavon-editor v-if="isMDShow" class="mavon" navigation @save="save" v-model="content"></mavon-editor>
     <nofile v-if="is404Show"></nofile>
+    <el-skeleton v-if="!is404Show && !isMDShow" :rows="6" animated />
   </div>
 </template>
 
